@@ -5,4 +5,4 @@ setup:
 db:
 	sqlite3 tables.db < tables.sql
 start:
-	uvicorn main:app  --host 0.0.0.0 --port 8080 
+	gunicorn main:app
