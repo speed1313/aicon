@@ -48,6 +48,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "https://speed1313.github.io/aicon/"
 ]
 app.add_middleware(
     CORSMiddleware,

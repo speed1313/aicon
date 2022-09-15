@@ -5,4 +5,4 @@ setup:
 db:
 	sqlite3 tables.db < tables.sql
 start:
-	gunicorn main:app
+	gunicorn -k uvicorn.workers.UvicornWorker main:app
