@@ -1,5 +1,6 @@
 # aicon
-AI icon generator with stable diffusion
+[AIcon](https://speed1313.github.io/aicon/)  is a AI generator site with stable diffusion
+
 
 ## Usage
 - view front end locally
