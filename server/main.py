@@ -10,9 +10,11 @@ import numpy as np
 from typing import Union
 from pydantic import BaseModel
 from fastapi import FastAPI, Response
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-
-
+from fastapi import BackgroundTasks
+import base64
+import logging
 class Item(BaseModel):
     model: Union[str, None] = None # model name
     seed: Union[int, None] = None # random seed for generating consistent images per prompt
@@ -48,11 +50,12 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "http://localhost:8000",
     "https://speed1313.github.io/aicon/"
 ]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -74,15 +77,18 @@ def update_item(item: Item):
     print(item)
     input: str =str(' '.join(["icon","of","a",item.prompt]))
     print(input)
+    generate_icon_image(input)
     return {"item_prompt": input}
 
-
 @app.get("/cat")
-def reply_cat():
-    image_bytes= open("output.png", "rb").read()
-    return Response(content=image_bytes, media_type="image/png")
+async def reply_cat():
 
-def generate_icon_image():
+    with open("output.png", "rb") as f:
+        raw_bytes = f.read()
+    image_bytes = base64.b64encode(raw_bytes)
+    return {"image": image_bytes}
+
+def generate_icon_image(prompt: str):
     if seed is not None:
         np.random.seed(seed)
     if init_image is None:
@@ -115,3 +121,6 @@ def generate_icon_image():
         eta = eta
     )
     cv2.imwrite(output, image)
+
+if __name__ =="__main__":
+     uvicorn.run(app, host="0.0.0.0", port=8000)
