@@ -1,5 +1,6 @@
 # -- coding: utf-8 --`
 import os
+from urllib import request
 # engine
 from stable_diffusion_engine import StableDiffusionEngine
 # scheduler
@@ -15,6 +16,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import BackgroundTasks
 import base64
 import logging
+import requests
+
+
 class Item(BaseModel):
     model: Union[str, None] = None # model name
     seed: Union[int, None] = None # random seed for generating consistent images per prompt
@@ -75,18 +79,31 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.post("/generate")
 def update_item(item: Item):
     print(item)
-    input: str =str(' '.join(["icon","of","a",item.prompt]))
+    input: str =str(' '.join([item.prompt, "アイコン"]))
     print(input)
-    generate_icon_image(input)
-    return {"item_prompt": input}
+    PRIMARY_KEY = os.environ.get("PRIMARY_KEY")
+    # send request to https://api.rinna.co.jp/models/tti/v2 HTTP/1.1
+    request_url = "https://api.rinna.co.jp/models/tti/v2"
+    headers = {"Content-Type": "application/json", "Cache-Control": "no-cache","Ocp-Apim-Subscription-Key": PRIMARY_KEY}
+    payload ={
+        "prompts": input,
+        "scale": 7.5
+    }
+    result = requests.request("POST", url=request_url, headers=headers, json=payload,timeout=10)
+    return {"item_prompt": input, "image": result.json()['image']}
 
 @app.get("/cat")
-async def reply_cat():
-
-    with open("output.png", "rb") as f:
-        raw_bytes = f.read()
-    image_bytes = base64.b64encode(raw_bytes)
-    return {"image": image_bytes}
+def reply_cat():
+    PRIMARY_KEY = os.environ.get("PRIMARY_KEY")
+    # send request to https://api.rinna.co.jp/models/tti/v2 HTTP/1.1
+    request_url = "https://api.rinna.co.jp/models/tti/v2"
+    headers = {"Content-Type": "application/json", "Cache-Control": "no-cache","Ocp-Apim-Subscription-Key": PRIMARY_KEY}
+    payload ={
+        "prompts": "icon of a cat",
+        "scale": 7.5
+    }
+    result = requests.request("POST", url=request_url, headers=headers, json=payload,timeout=10)
+    return {"image": result.json()['image']}
 
 def generate_icon_image(prompt: str):
     if seed is not None:

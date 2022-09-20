@@ -28,7 +28,7 @@ class TopicList extends React.Component {
     this.state = {
         item: [],
       DataisLoaded: false,
-        figure: [],
+        image: [],
     };
   }
 
@@ -77,6 +77,7 @@ class EasyForm extends React.Component {
   }
 
   handleSubmit(event) {
+
     fetch('http://localhost:8000/generate', {  // Enter your IP address here
       method: 'POST',
       headers: {
@@ -86,12 +87,11 @@ class EasyForm extends React.Component {
         prompt: this.state.value,
       }), // body data type must match "Content-Type" header
     }).then(res => res.json()).then(response => {
-      console.log("posted");
-      console.log(response);
-      this.setState({DataisLoaded: true,  items: response });
+      this.setState({ DataisLoaded: true, items: response.item_prompt, image: response.image });
     }).catch(error => console.error('Error:', error));
     event.preventDefault();
     // fetch figure
+    /*
     fetch('http://localhost:8000/cat', {  // Enter your IP address here
       method: 'GET',
       headers: {
@@ -100,9 +100,8 @@ class EasyForm extends React.Component {
       }
     }).then(response => response.json()).then(response => {
       console.log(response.image);
-      const data = "data:image/png;base64," + response.image;
-      this.setState({ DataisLoaded: true, figure: data });
-      }).catch(error => console.error('Error:', error));
+      this.setState({ DataisLoaded: true, figure: response.image});
+      }).catch(error => console.error('Error:', error));*/
   };
 
   render() {
@@ -113,7 +112,7 @@ class EasyForm extends React.Component {
           <ul>
 
           </ul>
-          <img src={this.state.figure} width="500" alt="figure" />
+          <img src={this.state.image} width="500" alt="figure" />
           <button onClick={() => this.setState({DataisLoaded: false})}>Retry</button>
         </div>
       )
